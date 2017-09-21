@@ -1,0 +1,55 @@
+from selenium import webdriver
+import os, time
+from xlrd import open_workbook
+from selenium.webdriver.common.keys import Keys
+
+path = os.getcwd()
+print (path)
+driver = webdriver.Firefox() #set firefox as the driver
+driver.get("https://www.pushbullet.com")#navigate to pushbullet.com
+time.sleep(2)#let it load
+sign_in = driver.find_element_by_id("sign-in-btn")
+sign_in.click()#click the sign in button
+time.sleep(2)#let it load
+sign_in_with_google = driver.find_element_by_xpath("/html/body/div/div[2]/div[2]/button[1]")
+sign_in_with_google.click()#sign in with google(can be modified using firebug for alternative sign in options
+time.sleep(2)#let it load
+email_id = driver.find_element_by_name("identifier")
+email_id.send_keys("***********")#enter your email
+email_id.send_keys(Keys.ENTER)#tell browser to hit Enter
+time.sleep(2)#let it load
+password = driver.find_element_by_name("password")
+password.send_keys("********")#subsitute your gmail password
+password.send_keys(Keys.ENTER)
+time.sleep(5)#let it load
+texting_button = driver.find_element_by_xpath("/html/body/div/div[2]/div[2]/div/div[1]/div[4]")
+texting_button.click()#select the texting function
+time.sleep(2)#let it load
+send_new_message_button = driver.find_element_by_xpath("/html/body/div/div[2]/div[2]/div/div[2]/div[1]/div[4]")
+send_new_message_button.click()#select the send new message function
+book = open_workbook("TestBook1.xlsx")#open your excel file with phone numbers in column 1, first names in column 2
+#and the personalized message in column 3
+sheet = book.sheet_by_index(0)#select the first sheet in the book
+print(sheet.name)#make sure your in the right spreadsheet
+print(sheet.ncols)#make sure you have 3 columns
+print(sheet.nrows)#this will show you how many people you are texting
+for row_idx in range(sheet.nrows):#creates a for loop to run through the entire spreadsheet until no data is left
+
+    phone_number = sheet.cell_value(row_idx, 0)#defines the cell to pull data from
+    first_name = sheet.cell_value(row_idx, 1)
+    message = sheet.cell_value(row_idx, 2)
+
+    input_phone_number = driver.find_element_by_id("picker-input")
+    input_phone_number.click()#select the phone number input box(make sure to put the phone number in "quotes" in your 
+    #spreadsheet to define it as a string.  Otherwise you risk a "float error.
+    input_phone_number.send_keys(phone_number)#input the phone number from the excel file
+    input_message = driver.find_element_by_id("sms-message")
+    input_message.click()#select the message dialog box
+    input_message.send_keys("Hi " + first_name + ", " + message)#Compiles the first name and personalized message into one 
+    #fluid text
+    input_message.send_keys(Keys.ENTER)#send the text
+    input_phone_number.click()
+    input_phone_number.clear()#clear the old number
+    time.sleep(2)#pause to let the page send the text and restart the process for the next row of data
+
+driver.quit()# close the browser
